@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hotel Booking</title>
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+        }
+
+        .main-container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .hero {
+            height: 300px;
+            background: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80') no-repeat center/cover;
+            border-radius: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+        }
+
+        .content {
+            position: relative;
+            text-align: center;
+            color: white;
+        }
+
+        .search-box {
+            position: absolute;
+            bottom: -30px;
+            background: white;
+            padding: 15px;
+            border-radius: 50px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            width: 80%;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .search-box input, .search-box select {
+            border: none;
+            outline: none;
+            padding: 10px;
+            flex: 1;
+        }
+
+        .search-btn {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-btn {
+            background: #f1f1f1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: #fff;
+            min-width: 180px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .dropdown-content a {
+            display: block;
+            padding: 8px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 6px;
+        }
+
+        .dropdown-content a:hover { background: #f2f2f2; }
+
+        .user-menu:hover .dropdown-content { display: block; }
+
+        /* ===== AI CHATBOX ===== */
+        #chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(79,172,254,0.5);
+            z-index: 9999;
+            font-size: 24px;
+            transition: transform 0.2s;
+        }
+
+        #chat-fab:hover { transform: scale(1.1); }
+
+        #chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 340px;
+            max-height: 500px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 9998;
+            animation: slideUp 0.25s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        #chat-header {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 18px 18px 0 0;
+        }
+
+        #chat-header .avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        #chat-header .title { font-weight: bold; font-size: 15px; }
+        #chat-header .subtitle { font-size: 11px; opacity: 0.85; }
+
+        #chat-header .close-btn {
+            margin-left: auto;
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0.8;
+            line-height: 1;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 340px;
+            background: #f8faff;
+        }
+
+        .chat-msg {
+            max-width: 82%;
+            padding: 10px 13px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .chat-msg.user {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            align-self: flex-end;
+            border-radius: 14px 14px 4px 14px;
+        }
+
+        .chat-msg.ai {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-radius: 14px 14px 14px 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 10px 14px;
+            background: white;
+            border-radius: 14px 14px 14px 4px;
+            align-self: flex-start;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .typing-indicator span {
+            width: 7px;
+            height: 7px;
+            background: #4facfe;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+            40%            { transform: translateY(-6px); opacity: 1; }
+        }
+
+        #chat-input-area {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+
+        #chat-input {
+            flex: 1;
+            border: 1.5px solid #e0e8ff;
+            border-radius: 20px;
+            padding: 9px 14px;
+            font-size: 13.5px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        #chat-input:focus { border-color: #4facfe; }
+
+        #chat-send {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        #chat-send:hover { opacity: 0.85; }
+        #chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+
+<body>
+
+<div class="main-container">
+
+    <!-- Navbar -->
+    <nav class="d-flex justify-content-between mb-3">
+        <h4>Tripster</h4>
+
+        <div>
+            <div th:if="${session.loggedUser == null}">
+                <a href="/signup" class="btn btn-outline-primary">Register</a>
+                <a href="/login" class="btn btn-primary">Sign in</a>
+            </div>
+
+            <div th:if="${session.loggedUser != null}">
+                <div class="user-menu">
+                    <div class="user-btn">
+                        👤 <span th:text="${session.loggedUser.name}"></span> ▼
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="/profile">👤 My Account</a>
+                        <a href="/my-bookings">📅 My Bookings</a>
+                        <a th:href="@{/myReviews}">⭐ Reviews</a>
+                        <a href="/saved">❤️ Saved</a>
+                        <hr>
+                        <a href="/login" class="text-danger">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="content">
+            <h2>Book your stay with Tripster</h2>
+            <p>148,000+ rooms around the world are waiting for you!</p>
+        </div>
+
+        <form method="get" action="/home" class="search-box">
+            <select name="city" class="form-control">
+                <option value="" disabled selected>Select City</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Bhopal">Bhopal</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Jaipur">Jaipur</option>
+            </select>
+            <input type="date" name="checkin" 
+             th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" 
+             required>
+            <input type="date" name="checkout" th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" 
+            required>
+            <input type="number" name="guests" placeholder="Guests">
+            <button type="submit" class="search-btn">→</button>
+        </form>
+    </div>
+
+    <!-- Hotels -->
+    <div class="mt-5 pt-5">
+        <h4 class="mb-3">Popular destinations</h4>
+        <div class="row mt-4">
+            <div class="col-md-4" th:each="hotel : ${hotels}">
+                <div class="card shadow mb-4">
+                    <img th:src="${hotel.imageUrl}"
+                         class="card-img-top"
+                         style="height:200px; object-fit:cover; border-radius:10px;">
+                    <div class="card-body">
+                        <h5 th:text="${hotel.name}"></h5>
+                        <p th:text="${hotel.city}"></p>
+                        🛏️ Single: ₹ <span th:text="${hotel.singlePrice}"></span><br>
+🛏️🛏️ Double: ₹ <span th:text="${hotel.doublePrice}"></span><br>
+👑 Suite: ₹ <span th:text="${hotel.suitePrice}"></span>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <a th:href="@{'/hotel/' + ${hotel.id}}"
+                               class="btn btn-primary btn-sm">View Details</a>
+                            <form th:action="@{/save/{id}(id=${hotel.id})}"
+                                  method="post" class="m-0">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    ❤️ Add To Wishlist
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== FLOATING AI CHAT BUTTON ===== -->
+<div id="chat-fab" onclick="toggleChat()" title="Chat with AI Assistant">🤖</div>
+
+<!-- ===== AI CHAT WINDOW ===== -->
+<div id="chat-window">
+    <div id="chat-header">
+        <div class="avatar">🤖</div>
+        <div>
+            <div class="title">Tripster AI Assistant</div>
+            <div class="subtitle">Ask me anything • Always here to help</div>
+        </div>
+        <div class="close-btn" onclick="toggleChat()">✕</div>
+    </div>
+
+    <div id="chat-messages">
+        <!-- Welcome message -->
+        <div class="chat-msg ai">
+            👋 Hi! I'm your Tripster AI assistant. I can help you with hotel recommendations, booking info, weather, travel tips, and more. What would you like to know? 😊
+        </div>
+    </div>
+
+    <div id="chat-input-area">
+        <input type="text" id="chat-input"
+               placeholder="Ask anything..."
+               onkeydown="if(event.key==='Enter') sendMessage()">
+        <button id="chat-send" onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
+<script>
+    let chatOpen = false;
+
+    function toggleChat() {
+        chatOpen = !chatOpen;
+        const win = document.getElementById('chat-window');
+        win.style.display = chatOpen ? 'flex' : 'none';
+        if (chatOpen) {
+            document.getElementById('chat-input').focus();
+            scrollToBottom();
+        }
+    }
+
+    function scrollToBottom() {
+        const msgs = document.getElementById('chat-messages');
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function addMessage(text, type) {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + type;
+        // Convert **bold** markdown and newlines
+        div.innerHTML = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        msgs.appendChild(div);
+        scrollToBottom();
+        return div;
+    }
+
+    function showTyping() {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'typing-indicator';
+        div.id = 'typing-dots';
+        div.innerHTML = '<span></span><span></span><span></span>';
+        msgs.appendChild(div);
+        scrollToBottom();
+    }
+
+    function removeTyping() {
+        const dots = document.getElementById('typing-dots');
+        if (dots) dots.remove();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send');
+        const text = input.value.trim();
+        if (!text) return;
+
+        // Show user message
+        addMessage(text, 'user');
+        input.value = '';
+        input.disabled = true;
+        sendBtn.disabled = true;
+
+        // Show typing indicator
+        showTyping();
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            removeTyping();
+            addMessage(data.reply || 'Sorry, I could not get a response. Please try again!', 'ai');
+
+        } catch (err) {
+            removeTyping();
+            addMessage('⚠️ Connection error. Please check your internet and try again.', 'ai');
+        } finally {
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    }
+</script>
+
+</body>
+</html>

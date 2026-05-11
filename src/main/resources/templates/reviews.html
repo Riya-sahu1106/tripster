@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Reviews</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .review-card {
+            border: none;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: 0.3s;
+        }
+
+        .review-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .review-stars {
+            color: gold;
+            font-size: 14px;
+        }
+
+        .review-comment {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .no-review {
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+    <h2>⭐ All Reviews</h2>
+
+    <!-- No Reviews -->
+    <div th:if="${#lists.isEmpty(reviews)}">
+        <p class="no-review">No reviews found 😢</p>
+    </div>
+
+    <!-- Reviews List -->
+    <div th:each="r : ${reviews}" class="review-card">
+
+        <div class="review-header">
+            <span class="review-name" th:text="${r.userName}">User</span>
+
+            <div class="review-stars">
+                <span th:each="i : ${#numbers.sequence(1,5)}"
+                      th:style="${i <= r.rating} ? 'color: gold;' : 'color: lightgray;'">
+                    ★
+                </span>
+            </div>
+        </div>
+
+        <div class="review-comment">
+            <span th:if="${r.comment != null && r.comment != ''}" th:text="${r.comment}"></span>
+            <span th:if="${r.comment == null || r.comment == ''}">No comment</span>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

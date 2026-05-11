@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Saved Hotels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+
+    <h3>Your Wishlist ❤️</h3>
+           
+     <div th:if="${#lists.isEmpty(savedHotels)}" class="text-center mt-5">
+        <h5>No hotels added 😔</h5>
+        <p>Start exploring and add hotels to your wishlist!</p>
+
+        <a href="/home" class="btn btn-primary mt-3">
+            Browse Hotels
+        </a>
+    </div>
+    
+    <div class="row mt-4">
+
+        <div class="col-md-4" th:each="saved : ${savedHotels}">
+            
+            <div class="card shadow mb-4">
+
+                <img th:src="${saved.hotel.imageUrl}" 
+                     class="card-img-top" 
+                     style="height:200px; object-fit:cover;">
+
+                <div class="card-body">
+                    <h5 th:text="${saved.hotel.name}"></h5>
+                    <p th:text="${saved.hotel.city}"></p>
+                    <p>₹ <span th:text="${saved.hotel.price}"></span> / night</p>
+
+                    <div class="d-flex justify-content-between">
+
+                        <!-- View Details -->
+                        <a th:href="@{'/hotel/' + ${saved.hotel.id}}" 
+                           class="btn btn-primary btn-sm">
+                            View Details
+                        </a>
+
+                        <!-- ❌ Remove from Wishlist -->
+                        <form th:action="@{/removeSaved/{id}(id=${saved.id})}" 
+                              method="post" 
+                              class="m-0">
+                            <button type="submit" 
+                                    class="btn btn-outline-danger btn-sm">
+                                ❌ Remove
+                            </button>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

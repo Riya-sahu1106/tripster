@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>UPI Payment</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(to right, #ede7f6, #ffffff);
+            font-family: 'Segoe UI';
+        }
+
+        .upi-card {
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 25px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .amount {
+            font-size: 22px;
+            color: #0d6efd;
+            margin-top: 10px;
+        }
+
+        .btn-pay {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="upi-card">
+
+    <h3>📱 UPI Payment</h3>
+
+    <form action="/payment/success" method="post">
+
+        <!-- UPI Input -->
+        <input type="text" name="upiId"
+               class="form-control"
+               placeholder="Enter UPI ID (e.g. user@upi)"
+               required
+               pattern=".+@.+">
+
+        <div class="amount">
+            ₹ <span th:text="${totalAmount}"></span>
+        </div>
+
+        <!-- Hidden fields -->
+        <input type="hidden" name="hotelId" th:value="${hotelId}">
+        <input type="hidden" name="checkIn" th:value="${checkIn}">
+        <input type="hidden" name="checkOut" th:value="${checkOut}">
+        <input type="hidden" name="totalAmount" th:value="${totalAmount}">
+
+        <!-- Pay Button -->
+        <button class="btn btn-success btn-pay">
+            Pay ₹ <span th:text="${totalAmount}"></span>
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

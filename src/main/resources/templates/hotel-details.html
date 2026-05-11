@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hotel Details</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+    .review-card {
+    border: 1px solid #eee;
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+    .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .review-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+    .review-stars {
+    color: gold;
+    font-size: 14px;
+}
+
+    .review-comment {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #444;
+}
+
+      .review-actions {
+      margin-top: 6px;
+} 
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+
+        <!-- Title -->
+        <h1 class="fw-bold" th:text="${hotel.name}"></h1>
+
+        <!-- ⭐ Dynamic Rating -->
+        <p class="text-muted">
+            Luxury Hotel in <span th:text="${hotel.city}"></span> ⭐ 
+            <span th:text="${avgRating}"></span>
+            (<span th:text="${reviewCount}"></span> reviews)
+        </p>
+
+        <!-- Images -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><img th:src="${hotel.image1}" class="img-fluid hotel-img"></div>
+            <div class="col-md-4"><img th:src="${hotel.image2}" class="img-fluid hotel-img"></div>
+            <div class="col-md-4"><img th:src="${hotel.image3}" class="img-fluid hotel-img"></div>
+            <div class="col-md-4"><img th:src="${hotel.image4}" class="img-fluid hotel-img"></div>
+            <div class="col-md-4"><img th:src="${hotel.image5}" class="img-fluid hotel-img"></div>
+        </div>
+
+        <!-- Info -->
+        <p><strong>City:</strong> <span th:text="${hotel.city}"></span></p>
+
+        <!-- Price -->
+        <p class="price">₹ <span th:text="${hotel.price}"></span> / night</p>
+
+        <!-- Features -->
+        <ul class="list-unstyled">
+            <li>✔ Free WiFi</li>
+            <li>✔ Swimming Pool</li>
+            <li>✔ Breakfast Included</li>
+            <li>✔ Parking Available</li>
+        </ul>
+
+        <!-- Location -->
+        <p>Location: <span th:text="${hotel.location}"></span></p>
+        <h4 class="mt-4">📍 Location Map</h4>
+
+        <iframe 
+            th:if="${hotel.location != null}"
+            th:src="'https://www.google.com/maps?q=' + ${hotel.location} + '&output=embed'"
+            width="100%" height="300"
+            style="border-radius:10px; border:0;">
+        </iframe>
+
+        <a th:href="'https://www.google.com/maps/search/?api=1&query=' + ${hotel.location}"
+           target="_blank"
+           class="btn btn-outline-primary mt-2">
+           Get Directions
+        </a>
+
+        <!-- Review Form -->
+        <h4 class="mt-4">⭐ Write a Review</h4>
+
+        <form action="/addReview" method="post">
+            <!-- 🔥 FIXED -->
+            <input type="hidden" name="hotel_id" th:value="${hotel.id}">
+
+            <label>Rating:</label>
+            <select name="rating" class="form-control mb-2">
+                <option value="" disabled selected>Please give your review</option>
+                <option value="5">5 ⭐</option>
+                <option value="4">4 ⭐</option>
+                <option value="3">3 ⭐</option>
+                <option value="2">2 ⭐</option>
+                <option value="1">1 ⭐</option>
+            </select>
+
+            <label>Comment:</label>
+            <textarea name="comment" class="form-control mb-2"></textarea>
+
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+            
+        </form>
+
+        <!-- ⭐ Reviews Section -->
+        <h3 class="mt-4">Customer Reviews ⭐</h3>
+            
+            
+            <p class="text-muted">
+               ⭐ <b th:text="${avgRating}"></b> 
+               (<span th:text="${reviewCount}"></span> reviews)
+            </p>
+          
+        <!-- No reviews -->
+        <div th:if="${#lists.isEmpty(reviews)}">
+            <p>No reviews yet </p>
+        </div>
+
+        <!-- Review List -->
+        <div th:each="r : ${reviews}" class="review-card">
+
+    <div class="review-header">
+        <span class="review-name" th:text="${r.userName}"></span>
+
+        <div class="review-stars">
+            <span th:each="i : ${#numbers.sequence(1,5)}"
+                  th:style="${i <= r.rating} ? 'color: gold;' : 'color: lightgray;'">
+                ★
+            </span>
+        </div>
+    </div>
+
+    <div class="review-comment">
+        <span th:if="${r.comment != null && r.comment != ''}" th:text="${r.comment}"></span>
+        <span th:if="${r.comment == null || r.comment == ''}">No comment</span>
+    </div>
+
+    <div class="review-actions">
+        <form th:if="${loggedUser != null and loggedUser.name == r.userName}"
+              th:action="@{/deleteReview}" method="post">
+
+            <input type="hidden" name="reviewId" th:value="${r.id}" />
+            <input type="hidden" name="hotel_id" th:value="${hotel.id}" />
+
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+
+        <a th:if="${loggedUser != null and loggedUser.name == r.userName}"
+           th:href="@{/reviews/edit/{id}(id=${r.id})}"
+           class="btn btn-sm btn-outline-primary mt-1">
+           Edit
+        </a>
+    </div>
+</div>
+  <div th:if="${duplicateError}" class="alert alert-warning mt-3" th:text="${duplicateError}"></div>
+     <!-- Buttons -->
+        <div class="mt-3">
+            <a href="/home" class="btn btn-outline-secondary">Back</a>
+            <a th:if="${loggedUser != null}" 
+   th:href="@{/booking(hotelId=${hotel.id})}" 
+   class="btn btn-success">Book Now</a>
+
+<a th:if="${loggedUser == null}" 
+   href="/signup" 
+       class="btn btn-success">Book Now</a>
+            </a>   
+                        
+        </div>
+        
+             
+</div>
+
+</body>
+</html>
