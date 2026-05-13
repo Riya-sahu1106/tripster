@@ -1,4 +1,4 @@
-# 🏨 Tripster / Hotel Booking System
+# 🏨 Tripster 
 
 A full-stack web application built with **Spring Boot** and **Thymeleaf** that allows users to search, book, and manage hotel reservations. Features include AI-powered hotel assistant, automated email notifications, PDF booking confirmations, and a complete admin dashboard.
 
@@ -109,8 +109,8 @@ src/
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/Riya-sahu1106/Hotel-Booking-System.git
-cd Hotel-Booking-System
+git clone https://github.com/Riya-sahu1106/tripster.git
+cd tripster
 ```
 
 **2. Create MySQL database**
@@ -145,14 +145,14 @@ http://localhost:8080
 ## 🐳 Run with Docker
 
 ```bash
-docker build -t hotel-booking-system .
+docker build -t tripster .
 docker run -p 8080:8080 \
   -e DB_USERNAME=root \
   -e DB_PASSWORD=yourpassword \
   -e GROQ_API_KEY=yourkey \
   -e MAIL_USERNAME=youremail \
   -e MAIL_PASSWORD=yourpassword \
-  hotel-booking-system
+  tripster
 ```
 
 ---
